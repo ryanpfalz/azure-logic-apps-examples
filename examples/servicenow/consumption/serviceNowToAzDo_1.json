@@ -1,0 +1,58 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Create_a_work_item": {
+                "inputs": {
+                    "body": {
+                        "title": "test"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['visualstudioteamservices']['connectionId']"
+                        }
+                    },
+                    "method": "patch",
+                    "path": "/@{encodeURIComponent('Sandbox')}/_apis/wit/workitems/$Bug",
+                    "queries": {
+                        "account": "ryanpfalz"
+                    }
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "evaluatedRecurrence": {
+                    "frequency": "Minute",
+                    "interval": 3
+                },
+                "recurrence": {
+                    "frequency": "Month",
+                    "interval": 3
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "visualstudioteamservices": {
+                    "connectionId": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/resourceGroups/logic-app-demos/providers/Microsoft.Web/connections/visualstudioteamservices",
+                    "connectionName": "visualstudioteamservices",
+                    "id": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/providers/Microsoft.Web/locations/centralus/managedApis/visualstudioteamservices"
+                }
+            }
+        }
+    }
+}
