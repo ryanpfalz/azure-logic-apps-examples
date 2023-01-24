@@ -2,24 +2,130 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Create_a_work_item": {
+            "Generate_Array_of_AzDO_Bugs": {
+                "actions": {
+                    "Append_to_array_variable_2": {
+                        "inputs": {
+                            "name": "AzDoBugs",
+                            "value": "@items('Generate_Array_of_AzDO_Bugs')?['System.Title']"
+                        },
+                        "runAfter": {},
+                        "type": "AppendToArrayVariable"
+                    }
+                },
+                "foreach": "@body('Get_AzDO_Bugs_from_query')?['value']",
+                "runAfter": {
+                    "Initialize_Array_of_AzDO_bugs": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            },
+            "Get_AzDO_Bugs_from_query": {
                 "inputs": {
-                    "body": {
-                        "title": "test"
-                    },
                     "host": {
                         "connection": {
                             "name": "@parameters('$connections')['visualstudioteamservices']['connectionId']"
                         }
                     },
-                    "method": "patch",
-                    "path": "/@{encodeURIComponent('Sandbox')}/_apis/wit/workitems/$Bug",
+                    "method": "get",
+                    "path": "/v2/@{encodeURIComponent('Test Project')}/queryResults/@{encodeURIComponent('5a8ae3b3-706c-4a44-86f0-f2b2422a9d35')}",
                     "queries": {
-                        "account": "ryanpfalz"
+                        "account": "ryanpfalz",
+                        "workItemsCount": 200
+                    }
+                },
+                "metadata": {
+                    "5a8ae3b3-706c-4a44-86f0-f2b2422a9d35": "My Queries/BugQuery"
+                },
+                "runAfter": {
+                    "Get_all_incidents": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Get_all_incidents": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['service-now']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/api/now/v2/table/@{encodeURIComponent('incident')}",
+                    "queries": {
+                        "sysparm_display_value": false,
+                        "sysparm_exclude_reference_link": true
                     }
                 },
                 "runAfter": {},
                 "type": "ApiConnection"
+            },
+            "If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO": {
+                "actions": {
+                    "Condition": {
+                        "actions": {
+                            "Create_a_work_item": {
+                                "inputs": {
+                                    "body": {
+                                        "description": "<p>@{items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['short_description']}</p>",
+                                        "title": "@items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['number']"
+                                    },
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['visualstudioteamservices']['connectionId']"
+                                        }
+                                    },
+                                    "method": "patch",
+                                    "path": "/@{encodeURIComponent('Test Project')}/_apis/wit/workitems/$@{encodeURIComponent('Bug')}",
+                                    "queries": {
+                                        "account": "ryanpfalz"
+                                    }
+                                },
+                                "runAfter": {},
+                                "type": "ApiConnection"
+                            }
+                        },
+                        "expression": {
+                            "and": [
+                                {
+                                    "not": {
+                                        "contains": [
+                                            "@variables('AzDoBugs')",
+                                            "@items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['number']"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "runAfter": {},
+                        "type": "If"
+                    }
+                },
+                "foreach": "@body('Get_all_incidents')?['result']",
+                "runAfter": {
+                    "Generate_Array_of_AzDO_Bugs": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            },
+            "Initialize_Array_of_AzDO_bugs": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "AzDoBugs",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Get_AzDO_Bugs_from_query": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "InitializeVariable"
             }
         },
         "contentVersion": "1.0.0.0",
@@ -33,12 +139,12 @@
         "triggers": {
             "Recurrence": {
                 "evaluatedRecurrence": {
-                    "frequency": "Minute",
-                    "interval": 3
+                    "frequency": "Month",
+                    "interval": 1
                 },
                 "recurrence": {
                     "frequency": "Month",
-                    "interval": 3
+                    "interval": 1
                 },
                 "type": "Recurrence"
             }
@@ -47,6 +153,11 @@
     "parameters": {
         "$connections": {
             "value": {
+                "service-now": {
+                    "connectionId": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/resourceGroups/logic-app-demos/providers/Microsoft.Web/connections/service-now",
+                    "connectionName": "service-now",
+                    "id": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/providers/Microsoft.Web/locations/centralus/managedApis/service-now"
+                },
                 "visualstudioteamservices": {
                     "connectionId": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/resourceGroups/logic-app-demos/providers/Microsoft.Web/connections/visualstudioteamservices",
                     "connectionName": "visualstudioteamservices",
