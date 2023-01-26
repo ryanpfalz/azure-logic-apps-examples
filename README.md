@@ -19,7 +19,7 @@ Work-in-progress collection of Logic Apps patterns, best practices, and examples
 -   [Optional - VS Code](https://code.visualstudio.com/Download) - for local Logic Apps development
 -   [Optional - .NET SDK](https://dotnet.microsoft.com/en-us/download) - for local Logic Apps development
 
-## Running this sample
+<!-- ## Running this sample
 
 ### _*Setting up the application components*_
 
@@ -31,7 +31,7 @@ Work-in-progress collection of Logic Apps patterns, best practices, and examples
 
 _A diagram visually describing the components in Azure._
 
-## Considerations & Next Steps
+## Considerations & Next Steps -->
 
 ## Additional Resources
 
