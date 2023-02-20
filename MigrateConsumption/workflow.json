@@ -4,11 +4,15 @@
         "actions": {},
         "triggers": {
             "Recurrence": {
-                "type": "Recurrence",
+                "evaluatedRecurrence": {
+                    "frequency": "Month",
+                    "interval": 1
+                },
                 "recurrence": {
                     "frequency": "Month",
-                    "interval": 3
-                }
+                    "interval": 1
+                },
+                "type": "Recurrence"
             }
         },
         "contentVersion": "1.0.0.0",
