@@ -1,0 +1,26 @@
+{
+  "service-now-std-RuntimeUrl": {
+    "type": "String",
+    "value": ""
+  },
+  "service-now-std-Auth": {
+    "type": "Object",
+    "value": {
+      "scheme": "Key",
+      "parameter": "@appsetting('service-now-std-RawAuthKey')",
+      "type": "Raw"
+    }
+  },
+  "visualstudioteamservices-std-RuntimeUrl": {
+    "type": "String",
+    "value": ""
+  },
+  "visualstudioteamservices-std-Auth": {
+    "type": "Object",
+    "value": {
+      "scheme": "Key",
+      "parameter": "@appsetting('visualstudioteamservices-std-RawAuthKey')",
+      "type": "Raw"
+    }
+  }
+}

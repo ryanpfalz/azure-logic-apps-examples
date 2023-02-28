@@ -1,0 +1,126 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "[resourceGroup().location]",
+      "type": "String"
+    },
+    "name": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "The name for the target Standard logic app resource that exists in the same subscription and resource group where the connections are being deployed. Set this parameter only when you want the deployment to create access policies for each connection that allow providing access to the target logic app by using a managed identity."
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "apiVersion": "2016-06-01",
+      "name": "service-now-std",
+      "location": "[parameters('location')]",
+      "kind": "V2",
+      "type": "Microsoft.Web/connections",
+      "tags": {
+        "LogicAppsExportCorrelationId": "92a5ef35-ce39-4d21-8900-366229ba6a00"
+      },
+      "resources": [
+        {
+          "condition": "[if(empty(parameters('name')), false(), true())]",
+          "apiVersion": "2016-06-01",
+          "name": "service-now-std-aface3e8-644f-4292-b571-cecccd55f447",
+          "location": "[parameters('location')]",
+          "type": "accessPolicies",
+          "dependsOn": [
+            "Microsoft.Web/connections/service-now-std"
+          ],
+          "properties": {
+            "principal": {
+              "type": "ActiveDirectory",
+              "identity": {
+                "objectId": "[if(empty(parameters('name')), 'NoObjectId', reference(resourceId('Microsoft.Web/Sites', parameters('name')), '2019-08-01', 'Full').identity.principalId)]",
+                "tenantId": "[if(empty(parameters('name')), 'NoTenantId', reference(resourceId('Microsoft.Web/Sites', parameters('name')), '2019-08-01', 'Full').identity.tenantId)]"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "importedAuthenticationConnectionReference": {
+          "name": "service-now",
+          "id": "/subscriptions/f239cc10-791b-4e6c-b835-ac4c0b77dbbe/resourceGroups/logic-app-demos/providers/Microsoft.Web/connections/service-now",
+          "type": "Microsoft.Web/connections"
+        },
+        "api": {
+          "displayName": "ServiceNow",
+          "description": "ServiceNow improves service levels, energizes employees, and enables your enterprise to work at lightspeed. Create, read and update records stored within ServiceNow including Incidents, Questions, Users and more.",
+          "iconUri": "https://connectoricons-prod.azureedge.net/releases/v1.0.1544/1.0.1544.2640/service-now/icon.png",
+          "brandColor": "#D1232B",
+          "category": "Standard",
+          "id": "[subscriptionresourceid('Microsoft.Web/locations/managedApis', parameters('location'), 'service-now')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-06-01",
+      "name": "visualstudioteamservices-std",
+      "location": "[parameters('location')]",
+      "kind": "V2",
+      "type": "Microsoft.Web/connections",
+      "tags": {
+        "LogicAppsExportCorrelationId": "92a5ef35-ce39-4d21-8900-366229ba6a00"
+      },
+      "resources": [
+        {
+          "condition": "[if(empty(parameters('name')), false(), true())]",
+          "apiVersion": "2016-06-01",
+          "name": "visualstudioteamservices-std-58f03fba-783f-407d-8399-955db662a687",
+          "location": "[parameters('location')]",
+          "type": "accessPolicies",
+          "dependsOn": [
+            "Microsoft.Web/connections/visualstudioteamservices-std"
+          ],
+          "properties": {
+            "principal": {
+              "type": "ActiveDirectory",
+              "identity": {
+                "objectId": "[if(empty(parameters('name')), 'NoObjectId', reference(resourceId('Microsoft.Web/Sites', parameters('name')), '2019-08-01', 'Full').identity.principalId)]",
+                "tenantId": "[if(empty(parameters('name')), 'NoTenantId', reference(resourceId('Microsoft.Web/Sites', parameters('name')), '2019-08-01', 'Full').identity.tenantId)]"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "api": {
+          "displayName": "Azure DevOps",
+          "description": "Azure DevOps provides services for teams to share code, track work, and ship software - for any language, all in a single package. It's the perfect complement to your IDE.",
+          "iconUri": "https://connectoricons-prod.azureedge.net/releases/v1.0.1621/1.0.1621.3191/vsts/icon.png",
+          "brandColor": "#0078d7",
+          "category": "Standard",
+          "id": "[subscriptionresourceid('Microsoft.Web/locations/managedApis', parameters('location'), 'visualstudioteamservices')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "connections": {
+      "type": "Object",
+      "value": {
+        "service-now-std": {
+          "runtimeUrlParameterKey": "service-now-std-RuntimeUrl",
+          "runtimeUrlParameterValue": "[reference('service-now-std').connectionRuntimeUrl]",
+          "authKeyAppsettingKey": "service-now-std-RawAuthKey",
+          "connectionId": "[resourceid('Microsoft.Web/connections', 'service-now-std')]"
+        },
+        "visualstudioteamservices-std": {
+          "runtimeUrlParameterKey": "visualstudioteamservices-std-RuntimeUrl",
+          "runtimeUrlParameterValue": "[reference('visualstudioteamservices-std').connectionRuntimeUrl]",
+          "authKeyAppsettingKey": "visualstudioteamservices-std-RawAuthKey",
+          "connectionId": "[resourceid('Microsoft.Web/connections', 'visualstudioteamservices-std')]"
+        }
+      }
+    }
+  }
+}

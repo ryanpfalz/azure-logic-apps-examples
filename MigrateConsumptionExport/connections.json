@@ -1,0 +1,25 @@
+{
+  "serviceProviderConnections": {},
+  "managedApiConnections": {
+    "service-now-std": {
+      "api": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/service-now"
+      },
+      "connection": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourcegroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/service-now-std"
+      },
+      "authentication": "@parameters('service-now-std-Auth')",
+      "connectionRuntimeUrl": "@parameters('service-now-std-RuntimeUrl')"
+    },
+    "visualstudioteamservices-std": {
+      "api": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/visualstudioteamservices"
+      },
+      "connection": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourcegroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/visualstudioteamservices-std"
+      },
+      "authentication": "@parameters('visualstudioteamservices-std-Auth')",
+      "connectionRuntimeUrl": "@parameters('visualstudioteamservices-std-RuntimeUrl')"
+    }
+  }
+}

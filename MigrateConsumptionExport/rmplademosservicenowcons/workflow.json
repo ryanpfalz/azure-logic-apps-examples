@@ -1,0 +1,151 @@
+{
+  "kind": "Stateful",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "triggers": {
+      "Recurrence": {
+        "recurrence": {
+          "frequency": "Month",
+          "interval": 1
+        },
+        "evaluatedRecurrence": {
+          "frequency": "Month",
+          "interval": 1
+        },
+        "type": "Recurrence"
+      }
+    },
+    "actions": {
+      "Generate_Array_of_AzDO_Bugs": {
+        "foreach": "@body('Get_AzDO_Bugs_from_query')?['value']",
+        "actions": {
+          "Append_to_array_variable_2": {
+            "runAfter": {},
+            "type": "AppendToArrayVariable",
+            "inputs": {
+              "name": "AzDoBugs",
+              "value": "@items('Generate_Array_of_AzDO_Bugs')?['System.Title']"
+            }
+          }
+        },
+        "runAfter": {
+          "Initialize_Array_of_AzDO_bugs": [
+            "Succeeded"
+          ]
+        },
+        "type": "Foreach"
+      },
+      "Get_AzDO_Bugs_from_query": {
+        "runAfter": {
+          "Get_all_incidents": [
+            "Succeeded"
+          ]
+        },
+        "metadata": {
+          "5a8ae3b3-706c-4a44-86f0-f2b2422a9d35": "My Queries/BugQuery"
+        },
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": null,
+              "referenceName": "visualstudioteamservices-std"
+            }
+          },
+          "method": "get",
+          "path": "/v2/@{encodeURIComponent('Test Project')}/queryResults/@{encodeURIComponent('5a8ae3b3-706c-4a44-86f0-f2b2422a9d35')}",
+          "queries": {
+            "account": "ryanpfalz",
+            "workItemsCount": 200
+          }
+        }
+      },
+      "Get_all_incidents": {
+        "runAfter": {},
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": null,
+              "referenceName": "service-now-std"
+            }
+          },
+          "method": "get",
+          "path": "/api/now/v2/table/@{encodeURIComponent('incident')}",
+          "queries": {
+            "sysparm_display_value": false,
+            "sysparm_exclude_reference_link": true
+          }
+        }
+      },
+      "If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO": {
+        "foreach": "@body('Get_all_incidents')?['result']",
+        "actions": {
+          "Condition": {
+            "actions": {
+              "Create_a_work_item": {
+                "runAfter": {},
+                "type": "ApiConnection",
+                "inputs": {
+                  "body": {
+                    "description": "<p>@{items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['short_description']}</p>",
+                    "title": "@items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['number']"
+                  },
+                  "host": {
+                    "connection": {
+                      "name": null,
+                      "referenceName": "visualstudioteamservices-std"
+                    }
+                  },
+                  "method": "patch",
+                  "path": "/@{encodeURIComponent('Test Project')}/_apis/wit/workitems/$@{encodeURIComponent('Bug')}",
+                  "queries": {
+                    "account": "ryanpfalz"
+                  }
+                }
+              }
+            },
+            "runAfter": {},
+            "expression": {
+              "and": [
+                {
+                  "not": {
+                    "contains": [
+                      "@variables('AzDoBugs')",
+                      "@items('If_a_new_incident_exists_in_SNOW,_add_it_to_AzDO')?['number']"
+                    ]
+                  }
+                }
+              ]
+            },
+            "type": "If"
+          }
+        },
+        "runAfter": {
+          "Generate_Array_of_AzDO_Bugs": [
+            "Succeeded"
+          ]
+        },
+        "type": "Foreach"
+      },
+      "Initialize_Array_of_AzDO_bugs": {
+        "runAfter": {
+          "Get_AzDO_Bugs_from_query": [
+            "Succeeded"
+          ]
+        },
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "AzDoBugs",
+              "type": "array"
+            }
+          ]
+        }
+      }
+    },
+    "outputs": {}
+  }
+}
