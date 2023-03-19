@@ -1,0 +1,110 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Parse_JSON_-_Get_Uploaded_Attachment_URL": {
+                "inputs": {
+                    "content": "@body('Send_an_HTTP_request_to_Azure_DevOps_-_Add_Attachment_(Filename_Hardcoded)')",
+                    "schema": {
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "runAfter": {
+                    "Send_an_HTTP_request_to_Azure_DevOps_-_Add_Attachment_(Filename_Hardcoded)": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ParseJson"
+            },
+            "Read_blob_content_-_Get_Binary_Data_(Hardcoded)": {
+                "inputs": {
+                    "parameters": {
+                        "blobName": "DemoPdf.pdf",
+                        "containerName": "demo"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "readBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {},
+                "type": "ServiceProvider"
+            },
+            "Send_an_HTTP_request_to_Azure_DevOps_-_Add_Attachment_(Filename_Hardcoded)": {
+                "inputs": {
+                    "body": {
+                        "Body": "@{base64(outputs('Read_blob_content_-_Get_Binary_Data_(Hardcoded)')?['body']?['content'])}",
+                        "IsBase64": true,
+                        "Method": "POST",
+                        "Uri": "Sandbox/_apis/wit/attachments?fileName=DemoPdf.pdf&api-version=7.0"
+                    },
+                    "host": {
+                        "connection": {
+                            "referenceName": "visualstudioteamservices"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/httprequest",
+                    "queries": {
+                        "account": "ryanpfalz"
+                    }
+                },
+                "runAfter": {
+                    "Read_blob_content_-_Get_Binary_Data_(Hardcoded)": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Send_an_HTTP_request_to_Azure_DevOps_-_Attach_to_work_item_(Work_item_Hardcoded)": {
+                "inputs": {
+                    "body": {
+                        "Body": "[\n  {\n    \"op\": \"add\",\n    \"path\": \"/relations/-\",\n    \"value\": {\n      \"rel\": \"AttachedFile\",\n      \"url\": \"@{body('Parse_JSON_-_Get_Uploaded_Attachment_URL')?['url']}\"\n    }\n  }\n]",
+                        "Headers": {
+                            "Content-Type": "application/json-patch+json"
+                        },
+                        "Method": "PATCH",
+                        "Uri": "Sandbox/_apis/wit/workitems/1248?api-version=7.0"
+                    },
+                    "host": {
+                        "connection": {
+                            "referenceName": "visualstudioteamservices"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/httprequest",
+                    "queries": {
+                        "account": "ryanpfalz"
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON_-_Get_Uploaded_Attachment_URL": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "frequency": "Month",
+                    "interval": 15
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "kind": "Stateful"
+}
