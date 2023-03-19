@@ -1,0 +1,144 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "For_each": {
+                "actions": {
+                    "Append_to_array_variable": {
+                        "inputs": {
+                            "name": "AzDoBugs",
+                            "value": "@items('For_each')?['System.Title']"
+                        },
+                        "runAfter": {},
+                        "type": "AppendToArrayVariable"
+                    }
+                },
+                "foreach": "@body('Get_query_results')?['value']",
+                "runAfter": {
+                    "Initialize_variable": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            },
+            "For_each_2": {
+                "actions": {
+                    "Condition": {
+                        "actions": {
+                            "Create_a_work_item": {
+                                "inputs": {
+                                    "body": {
+                                        "description": "<p></p>",
+                                        "title": "@items('For_each_2')?['number']"
+                                    },
+                                    "host": {
+                                        "connection": {
+                                            "referenceName": "visualstudioteamservices"
+                                        }
+                                    },
+                                    "method": "patch",
+                                    "path": "/@{encodeURIComponent('Test Project')}/_apis/wit/workitems/$Bug",
+                                    "queries": {
+                                        "account": "ryanpfalz"
+                                    }
+                                },
+                                "runAfter": {},
+                                "type": "ApiConnection"
+                            }
+                        },
+                        "expression": {
+                            "and": [
+                                {
+                                    "not": {
+                                        "contains": [
+                                            "@variables('AzDoBugs')",
+                                            "@items('For_each_2')?['number']"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "runAfter": {},
+                        "type": "If"
+                    }
+                },
+                "foreach": "@body('List_Records')?['result']",
+                "runAfter": {
+                    "For_each": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            },
+            "Get_query_results": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "visualstudioteamservices"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/v2/@{encodeURIComponent('Test Project')}/queryResults/@{encodeURIComponent('5a8ae3b3-706c-4a44-86f0-f2b2422a9d35')}",
+                    "queries": {
+                        "account": "ryanpfalz",
+                        "workItemsCount": 200
+                    }
+                },
+                "metadata": {
+                    "5a8ae3b3-706c-4a44-86f0-f2b2422a9d35": "My Queries/BugQuery"
+                },
+                "runAfter": {
+                    "List_Records": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Initialize_variable": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "AzDoBugs",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Get_query_results": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "InitializeVariable"
+            },
+            "List_Records": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "service-now"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/api/now/v2/table/@{encodeURIComponent('incident')}",
+                    "queries": {
+                        "sysparm_display_value": false,
+                        "sysparm_exclude_reference_link": true
+                    }
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "frequency": "Month",
+                    "interval": 15
+                },
+                "type": "Recurrence"
+            }
+        }
+    },
+    "kind": "Stateful"
+}
